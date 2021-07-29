@@ -65,6 +65,11 @@ const galleryItems = [
 ];
 
 const galleryRef = document.querySelector(".js-gallery");
+const modalWindowRef = document.querySelector(".js-lightbox");
+const modalWindowImageRef = modalWindowRef.querySelector(".lightbox__image");
+const modalWindowCloseButtonRef = modalWindowRef.querySelector(`[data-action="close-lightbox"]`);
+const modalWindowOverlayRef = modalWindowRef.querySelector(".lightbox__overlay");
+
 const galleryElementMarkup = createGalleryElement(galleryItems);
 
 galleryRef.insertAdjacentHTML("beforeend", galleryElementMarkup);
@@ -94,23 +99,39 @@ galleryRef.addEventListener("click", onOpenModalWindowClick);
 function onOpenModalWindowClick(e) {
   e.preventDefault();
 
-  let modalElementUrl = "";
-
-  if (!e.target.classList.contains("gallery__item")) {
+  if (!e.target.classList.contains("gallery__image")) {
     return;
   }
-  modalElementUrl = `${e.target.dataset.source}`;
 
-  console.log(e.target.dataset.source);
+  const modalElementUrl = e.target.dataset.source;
+
+  window.addEventListener("keydown", onCloseModalWindowEsc);
+  modalWindowRef.classList.add("is-open");
+  modalWindowImageRef.setAttribute("src", modalElementUrl);
 };
 
+modalWindowCloseButtonRef.addEventListener("click", onCloseModalWindowClick);
 
+function onCloseModalWindowClick() {  
+  const currentModalWindow = document.querySelector(".lightbox.is-open");
 
+  if (currentModalWindow) {
+    window.removeEventListener("keydown", onCloseModalWindowEsc);
+    currentModalWindow.classList.remove("is-open");
+    modalWindowImageRef.setAttribute("src", "");
+  }
+}
 
+modalWindowOverlayRef.addEventListener("click", onCloseModalWindowOverlayClick);
 
+function onCloseModalWindowOverlayClick(e) {
+  if (e.currentTarget === e.target) {
+    onCloseModalWindowClick();
+  }
+}
 
-
-
-
-
-
+function onCloseModalWindowEsc(e) {
+  if (e.code === "Escape") {
+    onCloseModalWindowClick();
+  }
+}
